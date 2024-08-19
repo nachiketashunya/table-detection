@@ -1,3 +1,4 @@
 CascadeTabNet/Checkpoints/
 *.log
 CascadeTabNet/testres/
+.ipynb_checkpoints/
