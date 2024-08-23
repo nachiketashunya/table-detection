@@ -17,7 +17,7 @@ conda activate pyten
 work_dir="/csehome/m23csa016/MTP/CascadeTabNet/work_dirs"
 config="/csehome/m23csa016/MTP/CascadeTabNet/Config"
 # Loop through different percentages
-for percentage in 10 15 20 25 30 40
+for percentage in 100
 do
     # Generate new config file path
     config_path="${config}/config_${percentage}.py"

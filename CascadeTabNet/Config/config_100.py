@@ -37,10 +37,6 @@ model = dict(
                 block='BASIC',
                 num_blocks=(4, 4, 4, 4),
                 num_channels=(32, 64, 128, 256))
-        ),
-        init_cfg=dict(
-            type='Pretrained', 
-            checkpoint='open-mmlab://msra/hrnetv2_w32'
         )
     ),
     neck = dict(
@@ -353,7 +349,7 @@ param_scheduler = [
 ]
 
 # the default value of by_epoch is True
-default_hooks = dict(checkpoint=dict(type='CheckpointHook', interval=30, by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Orig_Image'))
+default_hooks = dict(checkpoint=dict(type='CheckpointHook', interval=50, by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Original'))
 
 # vis_backends = [
 #     dict(type='LocalVisBackend')

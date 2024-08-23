@@ -43,13 +43,19 @@ for p in [10, 15, 20, 25, 30, 40]:
         # Process the result to the desired format
         output = []
         # Extracting labels, scores, and bboxes
-        if len(result['predictions']) != 0:
-            label = result['predictions'][0]['labels'][0] 
+        if len(result['predictions'][0]['labels']) != 0:
+            label = result['predictions'][0]['labels'][0]
+        else:
+            label = -1
+
+        if len(result['predictions'][0]['scores']) != 0:
             score = result['predictions'][0]['scores'][0]
+        else:
+            score = -1
+        
+        if len(result['predictions'][0]['bboxes']) != 0:
             bbox = result['predictions'][0]['bboxes'][0]
         else:
-            label = 0
-            score = 0
             bbox = [0, 0, 0, 0]
         
         x_min, y_min, x_max, y_max = bbox[0], bbox[1], bbox[2], bbox[3]

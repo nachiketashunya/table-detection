@@ -15,19 +15,13 @@ import json
 from xml.dom import minidom
 from collections import OrderedDict
 
-def generateVOC2Json(rootDir,xmlFiles):
+# Path to the pascal voc xml files 
+rootDir = "/scratch/m23csa016/tabdet_data/Orig_Annotations"
+
+def generateVOC2Json(xmlFiles, save_path, ds_type):
   attrDict = dict()
   # Add categories according to you Pascal VOC annotations
-  attrDict["categories"]=[{"supercategory":"none","id":1,"name":"Table"},
-                          {"supercategory":"none","id":2,"name":"cell"},
-                          {"supercategory":"none","id":3,"name":"borderless"}
-        # {"supercategory":"none","id":4,"name":"item_name"},
-        # {"supercategory":"none","id":5,"name":"item_desc"},
-        # {"supercategory":"none","id":6,"name":"price"},
-        # {"supercategory":"none","id":7,"name":"total_price_text"},
-        # {"supercategory":"none","id":8,"name":"total_price"},
-        # {"supercategory":"none","id":9,"name":"footer"}
-            ]
+  attrDict["categories"]=[{"supercategory":"none","id":1,"name":"Table"}]
   images = list()
   annotations = list()
   id1 = 1
@@ -59,7 +53,7 @@ def generateVOC2Json(rootDir,xmlFiles):
                 if(not isinstance(vals, list)):
                   vals = [vals]
                 for val in vals:
-                  if str(val['name']) == value["name"]:
+                  if str(val['name']).lower() == str(value["name"]).lower():
                     annotation = dict()
                     annotation["iscrowd"] = 0
                     annotation["image_id"] = image_id
@@ -101,20 +95,5 @@ def generateVOC2Json(rootDir,xmlFiles):
   # Save the final JSON file
   # jsonString = json.dumps(attrDict)
   jsonString = json.dumps(attrDict, indent = 4, sort_keys=True)
-  with open("/content/drive/My Drive/ICDAR 13 dataset/coco.json", "w") as f:
+  with open(f"{save_path}/{ds_type}.json", "w") as f:
     f.write(jsonString)
-
-# Path to the txt file (see at the top of this script)
-trainFile = "/content/drive/My Drive/ICDAR 13 dataset/coco.txt"
-trainXMLFiles = list()
-with open(trainFile, "r") as f:
-	for line in f:
-		fileName = line.strip()
-		print(fileName)
-		trainXMLFiles.append(fileName + ".xml")
-
-# Path to the pascal voc xml files 
-rootDir = "/content/drive/My Drive/ICDAR 13 dataset/2Be Fine Tuned"
-
-# Start execution
-generateVOC2Json(rootDir, trainXMLFiles)

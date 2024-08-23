@@ -7,7 +7,7 @@ default_hooks = dict(
     checkpoint=dict(
         by_epoch=True,
         interval=50,
-        out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Data_40',
+        out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Original',
         type='CheckpointHook'),
     logger=dict(interval=50, type='LoggerHook'),
     param_scheduler=dict(type='ParamSchedulerHook'),
@@ -20,7 +20,7 @@ env_cfg = dict(
     dist_cfg=dict(backend='nccl'),
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
 launcher = 'none'
-load_from = '/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Data_40/train_40/epoch_40.pth'
+load_from = None
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 model = dict(
@@ -372,7 +372,7 @@ param_scheduler = [
         ],
         type='MultiStepLR'),
 ]
-resume = True
+resume = False
 test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=1,
@@ -430,12 +430,12 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(max_epochs=200, type='EpochBasedTrainLoop', val_interval=5)
+train_cfg = dict(max_epochs=100, type='EpochBasedTrainLoop', val_interval=5)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
     batch_size=2,
     dataset=dict(
-        ann_file='/scratch/m23csa016/tabdet_data/Annotations/train_40.json',
+        ann_file='/scratch/m23csa016/tabdet_data/Annotations/train.json',
         backend_args=None,
         data_prefix=dict(img='/scratch/m23csa016/tabdet_data/Orig_Image'),
         data_root='/scratch/m23csa016/tabdet_data/',
@@ -515,4 +515,4 @@ visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
     ])
-work_dir = '/csehome/m23csa016/MTP/CascadeTabNet/work_dirs/train_40/'
+work_dir = '/csehome/m23csa016/MTP/CascadeTabNet/work_dirs/train_100/'

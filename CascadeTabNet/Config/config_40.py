@@ -37,10 +37,6 @@ model = dict(
                 block='BASIC',
                 num_blocks=(4, 4, 4, 4),
                 num_channels=(32, 64, 128, 256))
-        ),
-        init_cfg=dict(
-            type='Pretrained', 
-            checkpoint='open-mmlab://msra/hrnetv2_w32'
         )
     ),
     neck = dict(
@@ -249,7 +245,7 @@ model = dict(
 
 train_cfg = dict(
     type='EpochBasedTrainLoop',
-    max_epochs=40,
+    max_epochs=200,
     val_interval=5
 )
 
@@ -353,7 +349,7 @@ param_scheduler = [
 ]
 
 # the default value of by_epoch is True
-default_hooks = dict(checkpoint=dict(type='CheckpointHook', interval=20, by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Data_40'))
+default_hooks = dict(checkpoint=dict(type='CheckpointHook', interval=50, by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Data_40'))
 
 # vis_backends = [
 #     dict(type='LocalVisBackend')
@@ -388,5 +384,5 @@ env_cfg = dict(
     dist_cfg=dict(backend='nccl'))
 
 log_level = 'INFO'
-load_from = None
-resume = False
+load_from = "/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Data_40/train_40/epoch_40.pth"
+resume = True
