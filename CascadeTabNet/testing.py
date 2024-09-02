@@ -9,15 +9,17 @@ config_path = 'CascadeTabNet/Config'
 checkpoint_path = 'CascadeTabNet/Checkpoints'
 
 image_folder = os.path.join(data_root, "Orig_Image")  # Single folder for all images
-output_dir = 'CascadeTabNet/testres'
+output_dir = 'testres'
 
-def inference(annot_file, data_per):
+def inference(annot_file, by_percentage=False, data_per=[100], config_file=None, checkpoint_file=None, out_dir=None):
     for p in data_per:
-        config_file = os.path.join(config_path, f"config_{p}.py")
-        checkpoint_file = os.path.join(checkpoint_path, f"Data_{p}/train_{p}/epoch_200.pth")
+        if by_percentage:
+            config_file = os.path.join(config_path, f"config_{p}.py")
+            checkpoint_file = os.path.join(checkpoint_path, f"Data_{p}/train_{p}/epoch_200.pth")
 
-        out_dir = os.path.join(output_dir, f'data_{p}/end2end')
-        os.makedirs(out_dir, exist_ok=True)
+            out_dir = os.path.join(output_dir, f'data_{p}/end2end')
+            os.makedirs(out_dir, exist_ok=True)
+        
 
         pred_dir = os.path.join(out_dir, "preds")
         os.makedirs(pred_dir, exist_ok=True)
@@ -64,10 +66,16 @@ def inference(annot_file, data_per):
             if score < 0.95:
                 with open(f"{out_dir}/undetected.txt", 'a+') as f:
                     f.write(f"-1 {score:.4f} {img_filename}\n")
+                
+                with open(f"{out_dir}/undet_xmls.txt", 'a+') as f:
+                    f.write(f"{os.path.splitext(img_filename)[0]}.xml\n")
             
             else:
                 with open(f"{out_dir}/detected.txt", 'a+') as f:
                     f.write(f"0 {score:.4f} {img_filename}\n")
+                
+                with open(f"{out_dir}/det_xmls.txt", 'a+') as f:
+                    f.write(f"{os.path.splitext(img_filename)[0]}.xml\n")
             
             # Save the results to a file
             with open(f"{pred_dir}/{img_filename}.txt", 'w') as f:
