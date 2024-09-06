@@ -12,6 +12,20 @@ image_folder = os.path.join(data_root, "Orig_Image")  # Single folder for all im
 output_dir = 'testres'
 
 def inference(annot_file, by_percentage=False, data_per=[100], config_file=None, checkpoint_file=None, out_dir=None):
+    # Set the paths for the files once
+    undetected_file = f"{out_dir}/undetected.txt"
+    undet_xmls_file = f"{out_dir}/undet_xmls.txt"
+    detected_file = f"{out_dir}/detected.txt"
+    det_xmls_file = f"{out_dir}/det_xmls.txt"
+
+    # Ensure that files are empty before the loop starts
+    files_to_clear = [undetected_file, undet_xmls_file, detected_file, det_xmls_file]
+
+    # Check each file, create if it doesn't exist, and clear its content
+    for file in files_to_clear:
+        with open(file, 'w') as f:
+            pass  # Opening in 'w' mode clears the file content
+
     for p in data_per:
         if by_percentage:
             config_file = os.path.join(config_path, f"config_{p}.py")
@@ -64,17 +78,17 @@ def inference(annot_file, by_percentage=False, data_per=[100], config_file=None,
 
             # Keep track of correctly detected tables
             if score < 0.95:
-                with open(f"{out_dir}/undetected.txt", 'a+') as f:
+                with open(undetected_file, 'a+') as f:
                     f.write(f"-1 {score:.4f} {img_filename}\n")
-                
-                with open(f"{out_dir}/undet_xmls.txt", 'a+') as f:
+
+                with open(undet_xmls_file, 'a+') as f:
                     f.write(f"{os.path.splitext(img_filename)[0]}.xml\n")
             
             else:
-                with open(f"{out_dir}/detected.txt", 'a+') as f:
+                with open(detected_file, 'a+') as f:
                     f.write(f"0 {score:.4f} {img_filename}\n")
                 
-                with open(f"{out_dir}/det_xmls.txt", 'a+') as f:
+                with open(det_xmls_file, 'a+') as f:
                     f.write(f"{os.path.splitext(img_filename)[0]}.xml\n")
             
             # Save the results to a file

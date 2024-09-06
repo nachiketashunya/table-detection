@@ -1,0 +1,654 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.10.14
+    cli_version: 0.17.8
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1725371637
+    t:
+      1:
+      - 1
+      - 37
+      - 38
+      - 41
+      - 55
+      - 82
+      2:
+      - 1
+      - 37
+      - 38
+      - 41
+      - 55
+      - 82
+      3:
+      - 2
+      - 23
+      4: 3.10.14
+      5: 0.17.8
+      8:
+      - 5
+      13: linux-x86_64
+model:
+  desc: null
+  value:
+    type: CascadeRCNN
+    data_preprocessor:
+      type: DetDataPreprocessor
+      mean:
+      - 123.675
+      - 116.28
+      - 103.53
+      std:
+      - 58.395
+      - 57.12
+      - 57.375
+      bgr_to_rgb: true
+      pad_mask: true
+      pad_size_divisor: 32
+    backbone:
+      type: HRNet
+      extra:
+        stage1:
+          num_modules: 1
+          num_branches: 1
+          block: BOTTLENECK
+          num_blocks:
+          - 4
+          num_channels:
+          - 64
+        stage2:
+          num_modules: 1
+          num_branches: 2
+          block: BASIC
+          num_blocks:
+          - 4
+          - 4
+          num_channels:
+          - 32
+          - 64
+        stage3:
+          num_modules: 4
+          num_branches: 3
+          block: BASIC
+          num_blocks:
+          - 4
+          - 4
+          - 4
+          num_channels:
+          - 32
+          - 64
+          - 128
+        stage4:
+          num_modules: 3
+          num_branches: 4
+          block: BASIC
+          num_blocks:
+          - 4
+          - 4
+          - 4
+          - 4
+          num_channels:
+          - 32
+          - 64
+          - 128
+          - 256
+    neck:
+      type: HRFPN
+      in_channels:
+      - 32
+      - 64
+      - 128
+      - 256
+      out_channels: 256
+    rpn_head:
+      type: RPNHead
+      in_channels: 256
+      feat_channels: 256
+      anchor_generator:
+        type: AnchorGenerator
+        scales:
+        - 8
+        ratios:
+        - 0.5
+        - 1.0
+        - 2.0
+        strides:
+        - 4
+        - 8
+        - 16
+        - 32
+        - 64
+      bbox_coder:
+        type: DeltaXYWHBBoxCoder
+        target_means:
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        target_stds:
+        - 1.0
+        - 1.0
+        - 1.0
+        - 1.0
+      loss_cls:
+        type: CrossEntropyLoss
+        use_sigmoid: true
+        loss_weight: 1.0
+      loss_bbox:
+        type: SmoothL1Loss
+        beta: 0.1111111111111111
+        loss_weight: 1.0
+    roi_head:
+      type: CascadeRoIHead
+      num_stages: 3
+      stage_loss_weights:
+      - 1
+      - 0.5
+      - 0.25
+      bbox_roi_extractor:
+        type: SingleRoIExtractor
+        roi_layer:
+          type: RoIAlign
+          output_size: 7
+          sampling_ratio: 2
+        out_channels: 256
+        featmap_strides:
+        - 4
+        - 8
+        - 16
+        - 32
+      bbox_head:
+      - type: Shared2FCBBoxHead
+        in_channels: 256
+        fc_out_channels: 1024
+        roi_feat_size: 7
+        num_classes: 1
+        bbox_coder:
+          type: DeltaXYWHBBoxCoder
+          target_means:
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          target_stds:
+          - 0.1
+          - 0.1
+          - 0.2
+          - 0.2
+        reg_class_agnostic: true
+        loss_cls:
+          type: CrossEntropyLoss
+          use_sigmoid: false
+          loss_weight: 1.0
+        loss_bbox:
+          type: SmoothL1Loss
+          beta: 1.0
+          loss_weight: 1.0
+      - type: Shared2FCBBoxHead
+        in_channels: 256
+        fc_out_channels: 1024
+        roi_feat_size: 7
+        num_classes: 1
+        bbox_coder:
+          type: DeltaXYWHBBoxCoder
+          target_means:
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          target_stds:
+          - 0.05
+          - 0.05
+          - 0.1
+          - 0.1
+        reg_class_agnostic: true
+        loss_cls:
+          type: CrossEntropyLoss
+          use_sigmoid: false
+          loss_weight: 1.0
+        loss_bbox:
+          type: SmoothL1Loss
+          beta: 1.0
+          loss_weight: 1.0
+      - type: Shared2FCBBoxHead
+        in_channels: 256
+        fc_out_channels: 1024
+        roi_feat_size: 7
+        num_classes: 1
+        bbox_coder:
+          type: DeltaXYWHBBoxCoder
+          target_means:
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          target_stds:
+          - 0.033
+          - 0.033
+          - 0.067
+          - 0.067
+        reg_class_agnostic: true
+        loss_cls:
+          type: CrossEntropyLoss
+          use_sigmoid: false
+          loss_weight: 1.0
+        loss_bbox:
+          type: SmoothL1Loss
+          beta: 1.0
+          loss_weight: 1.0
+      mask_roi_extractor:
+        type: SingleRoIExtractor
+        roi_layer:
+          type: RoIAlign
+          output_size: 14
+          sampling_ratio: 2
+        out_channels: 256
+        featmap_strides:
+        - 4
+        - 8
+        - 16
+        - 32
+      mask_head:
+        type: FCNMaskHead
+        num_convs: 4
+        in_channels: 256
+        conv_out_channels: 256
+        num_classes: 1
+        loss_mask:
+          type: CrossEntropyLoss
+          use_mask: true
+          loss_weight: 1.0
+    train_cfg:
+      rpn:
+        assigner:
+          type: MaxIoUAssigner
+          pos_iou_thr: 0.7
+          neg_iou_thr: 0.3
+          min_pos_iou: 0.3
+          match_low_quality: true
+          ignore_iof_thr: -1
+        sampler:
+          type: RandomSampler
+          num: 256
+          pos_fraction: 0.5
+          neg_pos_ub: -1
+          add_gt_as_proposals: false
+        allowed_border: 0
+        pos_weight: -1
+        debug: false
+      rpn_proposal:
+        nms_pre: 2000
+        max_per_img: 2000
+        nms:
+          type: nms
+          iou_threshold: 0.7
+        min_bbox_size: 0
+        nms_across_levels: false
+        nms_post: 2000
+        max_num: 2000
+        nms_thr: 0.7
+      rcnn:
+      - assigner:
+          type: MaxIoUAssigner
+          pos_iou_thr: 0.5
+          neg_iou_thr: 0.5
+          min_pos_iou: 0.5
+          ignore_iof_thr: -1
+        sampler:
+          type: RandomSampler
+          num: 512
+          pos_fraction: 0.25
+          neg_pos_ub: -1
+          add_gt_as_proposals: true
+        mask_size: 28
+        pos_weight: -1
+        debug: false
+      - assigner:
+          type: MaxIoUAssigner
+          pos_iou_thr: 0.6
+          neg_iou_thr: 0.6
+          min_pos_iou: 0.6
+          ignore_iof_thr: -1
+        sampler:
+          type: RandomSampler
+          num: 512
+          pos_fraction: 0.25
+          neg_pos_ub: -1
+          add_gt_as_proposals: true
+        mask_size: 28
+        pos_weight: -1
+        debug: false
+      - assigner:
+          type: MaxIoUAssigner
+          pos_iou_thr: 0.7
+          neg_iou_thr: 0.7
+          min_pos_iou: 0.7
+          ignore_iof_thr: -1
+        sampler:
+          type: RandomSampler
+          num: 512
+          pos_fraction: 0.25
+          neg_pos_ub: -1
+          add_gt_as_proposals: true
+        mask_size: 28
+        pos_weight: -1
+        debug: false
+      stage_loss_weights:
+      - 1
+      - 0.5
+      - 0.25
+    test_cfg:
+      rpn:
+        nms_pre: 1000
+        max_per_img: 1000
+        nms:
+          type: nms
+          iou_threshold: 0.7
+        min_bbox_size: 0
+        nms_across_levels: false
+        nms_post: 1000
+        max_num: 1000
+        nms_thr: 0.7
+      rcnn:
+        score_thr: 0.05
+        nms:
+          type: nms
+          iou_threshold: 0.5
+        max_per_img: 100
+        mask_thr_binary: 0.5
+dataset_type:
+  desc: null
+  value: CocoDataset
+data_root:
+  desc: null
+  value: /scratch/m23csa016/tabdet_data/
+backend_args:
+  desc: null
+  value: null
+train_pipeline:
+  desc: null
+  value:
+  - type: LoadImageFromFile
+    backend_args: null
+  - type: LoadAnnotations
+    with_bbox: true
+    with_mask: true
+  - type: Resize
+    scale:
+    - 1333
+    - 800
+    keep_ratio: true
+  - type: RandomFlip
+    prob: 0.5
+  - type: PackDetInputs
+test_pipeline:
+  desc: null
+  value:
+  - type: LoadImageFromFile
+    backend_args: null
+  - type: Resize
+    scale:
+    - 1333
+    - 800
+    keep_ratio: true
+  - type: PackDetInputs
+    meta_keys:
+    - img_id
+    - img_path
+    - ori_shape
+    - img_shape
+    - scale_factor
+train_dataloader:
+  desc: null
+  value:
+    batch_size: 2
+    num_workers: 2
+    persistent_workers: true
+    sampler:
+      type: DefaultSampler
+      shuffle: true
+    batch_sampler:
+      type: AspectRatioBatchSampler
+    dataset:
+      type: CocoDataset
+      data_root: /scratch/m23csa016/tabdet_data/
+      ann_file: /scratch/m23csa016/tabdet_data/Annotations/automate/train.json
+      data_prefix:
+        img: /scratch/m23csa016/tabdet_data/Orig_Image
+      filter_cfg:
+        filter_empty_gt: true
+        min_size: 32
+      pipeline:
+      - type: LoadImageFromFile
+        backend_args: null
+      - type: LoadAnnotations
+        with_bbox: true
+        with_mask: true
+      - type: Resize
+        scale:
+        - 1333
+        - 800
+        keep_ratio: true
+      - type: RandomFlip
+        prob: 0.5
+      - type: PackDetInputs
+      backend_args: null
+      metainfo:
+        classes: Table
+val_dataloader:
+  desc: null
+  value:
+    batch_size: 1
+    num_workers: 2
+    persistent_workers: true
+    drop_last: false
+    sampler:
+      type: DefaultSampler
+      shuffle: false
+    dataset:
+      type: CocoDataset
+      data_root: /scratch/m23csa016/tabdet_data/
+      ann_file: /scratch/m23csa016/tabdet_data/Annotations/automate/test.json
+      data_prefix:
+        img: /scratch/m23csa016/tabdet_data/Orig_Image
+      test_mode: true
+      pipeline:
+      - type: LoadImageFromFile
+        backend_args: null
+      - type: Resize
+        scale:
+        - 1333
+        - 800
+        keep_ratio: true
+      - type: PackDetInputs
+        meta_keys:
+        - img_id
+        - img_path
+        - ori_shape
+        - img_shape
+        - scale_factor
+      backend_args: null
+      metainfo:
+        classes: Table
+test_dataloader:
+  desc: null
+  value:
+    batch_size: 1
+    num_workers: 2
+    persistent_workers: true
+    drop_last: false
+    sampler:
+      type: DefaultSampler
+      shuffle: false
+    dataset:
+      type: CocoDataset
+      data_root: /scratch/m23csa016/tabdet_data/
+      ann_file: /scratch/m23csa016/tabdet_data/Annotations/automate/test.json
+      data_prefix:
+        img: /scratch/m23csa016/tabdet_data/Orig_Image
+      test_mode: true
+      pipeline:
+      - type: LoadImageFromFile
+        backend_args: null
+      - type: Resize
+        scale:
+        - 1333
+        - 800
+        keep_ratio: true
+      - type: PackDetInputs
+        meta_keys:
+        - img_id
+        - img_path
+        - ori_shape
+        - img_shape
+        - scale_factor
+      backend_args: null
+      metainfo:
+        classes: Table
+val_evaluator:
+  desc: null
+  value:
+    type: CocoMetric
+    ann_file: /scratch/m23csa016/tabdet_data/Annotations/automate/test.json
+    metric:
+    - bbox
+    - segm
+    format_only: false
+    backend_args: null
+    classwise: true
+test_evaluator:
+  desc: null
+  value:
+    type: CocoMetric
+    ann_file: /scratch/m23csa016/tabdet_data/Annotations/automate/test.json
+    metric:
+    - bbox
+    - segm
+    format_only: false
+    backend_args: null
+    classwise: true
+train_cfg:
+  desc: null
+  value:
+    type: EpochBasedTrainLoop
+    max_epochs: 100
+    val_interval: 10
+val_cfg:
+  desc: null
+  value:
+    type: ValLoop
+test_cfg:
+  desc: null
+  value:
+    type: TestLoop
+param_scheduler:
+  desc: null
+  value:
+  - type: LinearLR
+    start_factor: 0.3333333333333333
+    by_epoch: false
+    begin: 0
+    end: 1000
+  - type: MultiStepLR
+    by_epoch: true
+    begin: 0
+    end: 28
+    milestones:
+    - 16
+    - 19
+    gamma: 0.1
+optim_wrapper:
+  desc: null
+  value:
+    type: OptimWrapper
+    optimizer:
+      type: SGD
+      lr: 0.002
+      momentum: 0.9
+      weight_decay: 0.0001
+    clip_grad:
+      max_norm: 35
+      norm_type: 2
+auto_scale_lr:
+  desc: null
+  value:
+    enable: false
+    base_batch_size: 16
+default_scope:
+  desc: null
+  value: mmdet
+default_hooks:
+  desc: null
+  value:
+    timer:
+      type: IterTimerHook
+    logger:
+      type: LoggerHook
+      interval: 50
+    param_scheduler:
+      type: ParamSchedulerHook
+    checkpoint:
+      type: CheckpointHook
+      interval: 50
+      by_epoch: true
+      out_dir: Checkpoints/Data_AL/10.0/Final
+    sampler_seed:
+      type: DistSamplerSeedHook
+    visualization:
+      type: DetVisualizationHook
+env_cfg:
+  desc: null
+  value:
+    cudnn_benchmark: false
+    mp_cfg:
+      mp_start_method: fork
+      opencv_num_threads: 0
+    dist_cfg:
+      backend: nccl
+vis_backends:
+  desc: null
+  value:
+  - type: LocalVisBackend
+  - type: WandbVisBackend
+    init_kwargs:
+      project: MTP
+      entity: nachiketashunya
+      group: cascade_mask_rcnn_hrnet
+visualizer:
+  desc: null
+  value:
+    type: DetLocalVisualizer
+    vis_backends:
+    - type: LocalVisBackend
+    - type: WandbVisBackend
+      init_kwargs:
+        project: MTP
+        entity: nachiketashunya
+        group: cascade_mask_rcnn_hrnet
+    name: visualizer
+    save_dir: /scratch/m23csa016/
+log_processor:
+  desc: null
+  value:
+    type: LogProcessor
+    window_size: 50
+    by_epoch: true
+log_level:
+  desc: null
+  value: INFO
+load_from:
+  desc: null
+  value: null
+resume:
+  desc: null
+  value: false
+classes:
+  desc: null
+  value: Table
+work_dir:
+  desc: null
+  value: work_dirs/train_auto

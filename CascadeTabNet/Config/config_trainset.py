@@ -245,7 +245,7 @@ model = dict(
 
 train_cfg = dict(
     type='EpochBasedTrainLoop',
-    max_epochs=1,
+    max_epochs=100,
     val_interval=10
 )
 
@@ -349,24 +349,26 @@ param_scheduler = [
 ]
 
 # the default value of by_epoch is True
-default_hooks = dict(checkpoint=dict(type='CheckpointHook', save_best='auto', by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Automatic'))
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=50, by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Automatic'),
+    logger=dict(type='LoggerHook', interval=50)
+)
 
-# vis_backends = [
-#     dict(type='LocalVisBackend')
-# ]
-
-# visualizer = dict(
-#     type='DetLocalVisualizer',
-#     vis_backends=vis_backends,
-#     name='visualizer'
-# )
-
-# visualization=dict( # user visualization of validation and test results
-#     type='DetVisualizationHook',
-#     draw=True,
-#     interval=1,
-#     show=False
-# )
+vis_backends = [
+    dict(type='LocalVisBackend'),
+    dict(type='WandbVisBackend',
+         init_kwargs={
+            'project': 'MTP',
+            'entity': 'nachiketashunya',
+            'group': 'cascade_mask_rcnn_hrnet'
+         })
+]
+visualizer = dict(
+    type='DetLocalVisualizer',
+    vis_backends=vis_backends,
+    name='visualizer',
+    save_dir="/scratch/m23csa016/"
+)
 
 optim_wrapper = dict(  # Optimizer wrapper config
     type='OptimWrapper',  # Optimizer wrapper type, switch to AmpOptimWrapper to enable mixed precision training.

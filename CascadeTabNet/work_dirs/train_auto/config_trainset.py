@@ -6,9 +6,8 @@ dataset_type = 'CocoDataset'
 default_hooks = dict(
     checkpoint=dict(
         by_epoch=True,
-        interval=1,
-        out_dir='Checkpoints/Data_AL/0.1/TrainSet',
-        save_best='auto',
+        interval=50,
+        out_dir='Checkpoints/Data_AL/40.0/TrainSet',
         type='CheckpointHook'),
     logger=dict(interval=50, type='LoggerHook'),
     param_scheduler=dict(type='ParamSchedulerHook'),
@@ -432,7 +431,7 @@ test_pipeline = [
         ),
         type='PackDetInputs'),
 ]
-train_cfg = dict(max_epochs=1, type='EpochBasedTrainLoop', val_interval=10)
+train_cfg = dict(max_epochs=60, type='EpochBasedTrainLoop', val_interval=6)
 train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),
     batch_size=2,
@@ -513,11 +512,24 @@ val_evaluator = dict(
     type='CocoMetric')
 vis_backends = [
     dict(type='LocalVisBackend'),
+    dict(
+        init_kwargs=dict(
+            entity='nachiketashunya',
+            group='cascade_mask_rcnn_hrnet',
+            project='MTP'),
+        type='WandbVisBackend'),
 ]
 visualizer = dict(
     name='visualizer',
+    save_dir='/scratch/m23csa016/',
     type='DetLocalVisualizer',
     vis_backends=[
         dict(type='LocalVisBackend'),
+        dict(
+            init_kwargs=dict(
+                entity='nachiketashunya',
+                group='cascade_mask_rcnn_hrnet',
+                project='MTP'),
+            type='WandbVisBackend'),
     ])
 work_dir = 'work_dirs/train_auto'
