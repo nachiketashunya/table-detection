@@ -1,0 +1,32 @@
+Algorithm: Iterative Active Learning for CascadeTabNet with Incremental Training Data
+
+Input:
+    D: Complete dataset
+    T: Confidence threshold for filtering low-confidence predictions
+    M: CascadeTabNet model
+    train_splits = {10, 20, 25, 30, 40}: Fraction of training data
+    test_split = 10%: Fraction of data for final testing
+
+Output:
+    R: Results on final test set for each train split
+
+1. Split D into D_train (90%) and D_test (10%).
+
+2. FOR each split fraction f in train_splits:
+    a. Split D_train into D_train_f (f% of D_train) and D_val_f ((100-f)% of D_train).
+
+    b. Train model M on D_train_f.
+    
+    c. Perform inference using M on D_val_f.
+    
+    d. Collect set L of all samples in D_val_f where confidence scores are less than T.
+    
+    e. Augment the training data: D_train_aug_f = D_train_f ∪ L.
+    
+    f. Retrain model M on D_train_aug_f.
+    
+    g. Perform inference using retrained model M on D_test.
+    
+    h. Store results R_f for split fraction f.
+
+3. Return results R for all train splits.

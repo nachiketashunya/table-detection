@@ -291,7 +291,7 @@ train_dataloader = dict(   # Train dataloader config
         type=dataset_type,
         data_root=data_root,
         metainfo=dict(classes=classes),
-        ann_file=data_root + 'Annotations/train.json',  # Path of annotation file
+        ann_file=data_root + 'Annotations/train_90.json',  # Path of annotation file
         data_prefix=dict(img=data_root + 'Orig_Image'),  # Prefix of image path
         # filter_cfg=dict(filter_empty_gt=True),  # Config of filtering images and annotations
         pipeline=train_pipeline,
@@ -311,7 +311,7 @@ val_dataloader = dict(  # Validation dataloader config
         type=dataset_type,
         data_root=data_root,
         metainfo=dict(classes=classes),
-        ann_file=data_root + 'Annotations/test.json',
+        ann_file=data_root + 'Annotations/test_10.json',
         data_prefix=dict(img=data_root + 'Orig_Image'),
         test_mode=True,  # Turn on the test mode of the dataset to avoid filtering annotations or images
         pipeline=test_pipeline,
@@ -324,7 +324,7 @@ test_dataloader = val_dataloader  # Testing dataloader config
 
 val_evaluator = dict(  # Validation evaluator config
     type='CocoMetric',  # The coco metric used to evaluate AR, AP, and mAP for detection and instance segmentation
-    ann_file=data_root + 'Annotations/test.json',  # Annotation file path
+    ann_file=data_root + 'Annotations/test_10.json',  # Annotation file path
     metric=['bbox', 'segm'],  # Metrics to be evaluated, `bbox` for detection and `segm` for instance segmentation
     format_only=False,
     classwise=True,
@@ -349,23 +349,25 @@ param_scheduler = [
 ]
 
 # the default value of by_epoch is True
-default_hooks = dict(checkpoint=dict(type='CheckpointHook', interval=50, by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Original'))
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=50, by_epoch=True, out_dir='/csehome/m23csa016/MTP/CascadeTabNet/Checkpoints/Original')
+)
 
 # vis_backends = [
-#     dict(type='LocalVisBackend')
+#     dict(type='LocalVisBackend'),
+#     dict(type='WandbVisBackend',
+#          init_kwargs={
+#             'project': 'MTP',
+#             'entity': 'nachiketashunya',
+#             'group': 'cascade_mask_rcnn_hrnet'
+#          })
 # ]
 
 # visualizer = dict(
 #     type='DetLocalVisualizer',
 #     vis_backends=vis_backends,
-#     name='visualizer'
-# )
-
-# visualization=dict( # user visualization of validation and test results
-#     type='DetVisualizationHook',
-#     draw=True,
-#     interval=1,
-#     show=False
+#     name='visualizer',
+#     save_dir="/scratch/m23csa016/"
 # )
 
 optim_wrapper = dict(  # Optimizer wrapper config

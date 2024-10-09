@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=ctab_run
-#SBATCH --partition=medium
+#SBATCH --partition=mtech
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
@@ -14,5 +14,5 @@ source /opt/ohpc/apps/conda/bin/activate
 conda activate pyten
 
 python training.py
-
+# python nosplit.py
 

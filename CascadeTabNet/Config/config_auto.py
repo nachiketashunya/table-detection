@@ -37,6 +37,10 @@ model = dict(
                 block='BASIC',
                 num_blocks=(4, 4, 4, 4),
                 num_channels=(32, 64, 128, 256))
+        ),
+        init_cfg=dict(
+            type='Pretrained', 
+            checkpoint='open-mmlab://msra/hrnetv2_w32'
         )
     ),
     neck = dict(
@@ -292,7 +296,7 @@ train_dataloader = dict(   # Train dataloader config
         data_root=data_root,
         metainfo=dict(classes=classes),
         ann_file=data_root + 'Annotations/automate/train.json',  # Path of annotation file
-        data_prefix=dict(img=data_root + 'Orig_Image'),  # Prefix of image path
+        data_prefix=dict(img=data_root + 'Dilated'),  # Prefix of image path
         # filter_cfg=dict(filter_empty_gt=True),  # Config of filtering images and annotations
         pipeline=train_pipeline,
         backend_args=backend_args
@@ -312,7 +316,7 @@ val_dataloader = dict(  # Validation dataloader config
         data_root=data_root,
         metainfo=dict(classes=classes),
         ann_file=data_root + 'Annotations/automate/test.json',
-        data_prefix=dict(img=data_root + 'Orig_Image'),
+        data_prefix=dict(img=data_root + 'Dilated'),
         test_mode=True,  # Turn on the test mode of the dataset to avoid filtering annotations or images
         pipeline=test_pipeline,
         backend_args=backend_args

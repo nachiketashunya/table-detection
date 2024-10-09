@@ -8,7 +8,7 @@ data_root = "/scratch/m23csa016/tabdet_data"
 config_path = 'CascadeTabNet/Config'
 checkpoint_path = 'CascadeTabNet/Checkpoints'
 
-image_folder = os.path.join(data_root, "Orig_Image")  # Single folder for all images
+image_folder = os.path.join(data_root, "Dilated")  # Single folder for all images
 output_dir = 'testres'
 
 def inference(annot_file, by_percentage=False, data_per=[100], config_file=None, checkpoint_file=None, out_dir=None):

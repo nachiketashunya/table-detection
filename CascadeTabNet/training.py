@@ -13,6 +13,8 @@ from testing import inference
 # Constants
 XML_DIR = "/scratch/m23csa016/tabdet_data/Orig_Annotations"
 SAVE_PATH = "/scratch/m23csa016/tabdet_data/Annotations/automate"
+CHECKPOINT_PATH = "/scratch/m23csa016/tabdet_data/Checkpoints/Data_AL_Pretrained_Dilated"
+TEST_RESULTS = "/scratch/m23csa016/tabdet_data/testres/Data_AL_Pretrained_Dilated"
 MAX_EPOCHS = 60
 
 """
@@ -56,11 +58,13 @@ def configure_and_train(config_path, checkpoint_path, work_dir_path):
     runner = Runner.from_cfg(cfg)
     runner.train()
 
+    wandb.finish()
+
 def inference_and_update(train_test_annot, config_path, checkpoint_path, out_dir, train_train):
     """Run inference and update the training set with undetected XMLs."""
     os.makedirs(out_dir, exist_ok=True)
     inference(train_test_annot, config_file=config_path, 
-              checkpoint_file=os.path.join(checkpoint_path, f"train_auto/epoch_{MAX_EPOCHS}.pth"), 
+              checkpoint_file=os.path.join(checkpoint_path, f"train_auto_pretrained_dilated/epoch_{MAX_EPOCHS}.pth"), 
               out_dir=out_dir)
 
     undetected_path = f"{out_dir}/undet_xmls.txt"
@@ -74,10 +78,10 @@ def retrain_with_undetected(fraction, train_train, save_path):
     """Retrain the model with updated training data."""
     generateVOC2Json(train_train, save_path, "train")
 
-    work_dir_path = "work_dirs/train_auto"
+    work_dir_path = "work_dirs/train_auto_pretrained_dilated"
     config_path = "Config/config_auto.py"
-    checkpoint_path = f"Checkpoints/Data_AL/{fraction * 100}/Final"
-    out_dir = os.path.join('testres', f'data_AL/{fraction * 100}/Final')
+    checkpoint_path = os.path.join(CHECKPOINT_PATH, f"{fraction * 100}/Final")
+    out_dir = os.path.join(TEST_RESULTS, f'{fraction * 100}/Final')
 
     # Original XML files
     xmlfiles = os.listdir(XML_DIR)
@@ -105,18 +109,18 @@ def main():
 
     generateVOC2Json(test_files, SAVE_PATH, "test")
 
-    for fraction in np.round(np.arange(0.40, 0.45, 0.05), 2):
+    for fraction in np.round(np.arange(0.10, 0.40, 0.05), 2):
         # Prepare dataset
         train_files, train_test, train_train = prepare_data(train_files, fraction, SAVE_PATH)
         
         # Initial training
         config_path = "Config/config_trainset.py"
-        work_dir_path = "work_dirs/train_auto"
-        checkpoint_path = f"Checkpoints/Data_AL/{fraction*100}/TrainSet"
+        work_dir_path = "work_dirs/train_auto_pretrained_dilated"
+        checkpoint_path = os.path.join(CHECKPOINT_PATH, f"{fraction*100}/TrainSet")
         configure_and_train(config_path, checkpoint_path, work_dir_path)
 
         # Run inference and update training set
-        out_dir = os.path.join('testres', f'data_AL/{fraction*100}/TrainSet')
+        out_dir = os.path.join(TEST_RESULTS, f'{fraction*100}/TrainSet')
         undetected_xmls = inference_and_update(
             os.path.join(SAVE_PATH, "train_test.json"), config_path, checkpoint_path, out_dir, train_train
         )
