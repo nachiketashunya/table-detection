@@ -13,6 +13,6 @@ module load conda/conda
 source /opt/ohpc/apps/conda/bin/activate
 conda activate pyten
 
-python training.py
+python train_cluster.py
 # python nosplit.py
 

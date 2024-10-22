@@ -5,6 +5,7 @@ import numpy as np
 from mmengine.config import Config
 from mmengine.runner import Runner
 import wandb
+import pandas as pd
 
 sys.path.append("/csehome/m23csa016/MTP")
 from DataPreparation.generateVOC2JSON import generateVOC2Json
@@ -43,9 +44,12 @@ def prepare_data(xmlfiles, fraction, save_path):
 
     return xmlfiles, train_test, train_train
 
-def configure_and_train(config_path, checkpoint_path, work_dir_path):
+def configure_and_train(config_path, checkpoint_path, work_dir_path, run_name):
     # Initialize wandb
-    wandb.init()
+    wandb.init(
+        project='MTP-Cluster-Avg',
+        name=run_name
+    )
 
     """Load configuration, set paths, and train the model."""
     os.makedirs(checkpoint_path, exist_ok=True)
@@ -80,8 +84,8 @@ def retrain_with_undetected(fraction, train_train, save_path):
 
     work_dir_path = "work_dirs/train_auto_pd_avg"
     config_path = "Config/config_auto.py"
-    checkpoint_path = os.path.join(CHECKPOINT_PATH, f"{fraction * 100}/Final")
-    out_dir = os.path.join(TEST_RESULTS, f'{fraction * 100}/Final')
+    checkpoint_path = os.path.join(CHECKPOINT_PATH, f"{fraction * 100}/CLUSTER_AVG")
+    out_dir = os.path.join(TEST_RESULTS, f'{fraction * 100}/CLUSTER_AVG')
 
     # Original XML files
     xmlfiles = os.listdir(XML_DIR)
@@ -93,8 +97,73 @@ def retrain_with_undetected(fraction, train_train, save_path):
         f.write(f"Total Training Files: {len(train_train)}\n")
         f.write(f"Fraction: {len(train_train)/len(xmlfiles) * 100:.2f}%\n")
 
-    configure_and_train(config_path, checkpoint_path, work_dir_path)
+    run_name = f"{fraction*100}_CLUSTER_AVG"
+    configure_and_train(config_path, checkpoint_path, work_dir_path, run_name)
 
+# Create cluster based Undetected XML files
+def create_clustered_xml(dir):
+    # Define ranges for confidence scores and percentages
+    ranges = {
+        (0, 40): 1.00,
+        (40, 50): 0.90,
+        (50, 60): 0.80,
+        (60, 70): 0.70,
+        (70, 80): 0.60,
+        (80, 90): 0.50,
+        (90, 100): 0.40
+    }
+
+    # Step 1: Read the text file
+    data = []
+    input_file = os.path.join(dir, "undetected.txt")
+    with open(input_file, 'r') as file:
+        for line in file:
+            parts = line.strip().split()
+            confidence_score = float(parts[1])
+            data.append([confidence_score, parts[2]])
+
+    # Convert data to a pandas DataFrame for easier manipulation
+    df = pd.DataFrame(data, columns=['Confidence', 'File'])
+
+    # Step 2: Group and sample data
+    sampled_data = []
+    representation = {}
+
+    for (lower, upper), percentage in ranges.items():
+        # Filter rows within the current range
+        df_range = df[(df['Confidence'] >= lower/100) & (df['Confidence'] < upper/100)]
+        
+        # Sample the required percentage of rows from this range
+        sample_size = int(np.floor(len(df_range) * percentage))
+        sampled = df_range.sample(n=sample_size, random_state=42)  # Random state for reproducibility
+        
+        # Append the sampled data
+        sampled_data.append(sampled)
+
+        # Note the no of files
+        representation[f"{lower}-{upper}"] = len(sampled)
+
+    # Combine all sampled data into one DataFrame
+    final_sampled_df = pd.concat(sampled_data)
+
+    # Step 3: Write the sampled data into a new text file
+    output_file = os.path.join(dir, 'clus_undet_xmls.txt')
+    ret_xmls = []
+    with open(output_file, 'w') as file:
+        for _, row in final_sampled_df.iterrows():
+            xml_file = row['File'].replace('.jpg', '.xml')
+            file.write(f"{xml_file}\n")
+
+            ret_xmls.append(xml_file)
+
+    print("Clustering and sampling complete.\n")
+    print("Number of files in each range: \n")
+    
+    for key, values in representation.items():
+        print(f"{key}: {values} Files")
+    
+    return ret_xmls
+    
 def main():
     # Log into wandb
     wandb.login(key="82fadbf5b2810c5fdaee488a728eabb8f084b7a3")
@@ -109,24 +178,15 @@ def main():
 
     generateVOC2Json(test_files, SAVE_PATH, "test")
 
-    for fraction in np.round(np.arange(0.10, 0.40, 0.05), 2):
+    for fraction in np.round(np.arange(0.10, 0.45, 0.05), 2):
         # Prepare dataset
         train_files, train_test, train_train = prepare_data(train_files, fraction, SAVE_PATH)
         
-        # Initial training
-        config_path = "Config/config_trainset.py"
-        work_dir_path = "work_dirs/train_auto_pd_avg"
-        checkpoint_path = os.path.join(CHECKPOINT_PATH, f"{fraction*100}/TrainSet")
-        configure_and_train(config_path, checkpoint_path, work_dir_path)
+        # Create Clusters for undetected XMLs
+        dir = os.path.join(TEST_RESULTS, f'{fraction*100}/TrainSet')
+        undetected_xmls = create_clustered_xml(dir)
 
-        # Run inference and update training set
-        out_dir = os.path.join(TEST_RESULTS, f'{fraction*100}/TrainSet')
-        undetected_xmls = inference_and_update(
-            os.path.join(SAVE_PATH, "train_test.json"), config_path, checkpoint_path, out_dir, train_train
-        )
-
-        # Remove undetected XMLs from train_test
-        train_test = [xml for xml in train_test if xml not in undetected_xmls]
+        train_train.extend(undetected_xmls)
 
         # Retrain with updated dataset
         retrain_with_undetected(fraction, train_train, SAVE_PATH)
